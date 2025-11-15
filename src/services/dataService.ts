@@ -1,11 +1,15 @@
 import axios from 'axios';
-import { Bounds } from '../types';
-import { config } from '../config';
 
 const NYC_OPEN_DATA_BASE = 'https://data.cityofnewyork.us/resource';
-const NYC_511_BASE = 'https://511ny.org/api';
 const NWS_ALERTS_BASE = 'https://api.weather.gov/alerts/active';
 const NWS_FORECAST_BASE = 'https://api.weather.gov';
+
+export interface Bounds {
+  min_lat: number;
+  min_lng: number;
+  max_lat: number;
+  max_lng: number;
+}
 
 export interface CrashData {
   id?: string;
@@ -36,7 +40,18 @@ export interface ConstructionData {
   permit_type?: string;
 }
 
-export class DataService {
+export interface SpeedingData {
+  lat: number;
+  lng: number;
+  violations: number;
+  camera_location?: string;
+}
+
+class DataService {
+  private getNYCOpenDataApiKey(): string {
+    return import.meta.env.VITE_NYC_OPEN_DATA_API_KEY || '';
+  }
+
   async getCrashes(bounds: Bounds, days: number = 365): Promise<CrashData[]> {
     try {
       const params: any = {
@@ -45,8 +60,9 @@ export class DataService {
         $order: 'crash_date DESC',
       };
 
-      if (config.nycOpenDataApiKey) {
-        params.$$app_token = config.nycOpenDataApiKey;
+      const apiKey = this.getNYCOpenDataApiKey();
+      if (apiKey) {
+        params.$$app_token = apiKey;
       }
 
       const response = await axios.get(
@@ -96,8 +112,9 @@ export class DataService {
         $order: 'cmplnt_fr_dt DESC',
       };
 
-      if (config.nycOpenDataApiKey) {
-        params.$$app_token = config.nycOpenDataApiKey;
+      const apiKey = this.getNYCOpenDataApiKey();
+      if (apiKey) {
+        params.$$app_token = apiKey;
       }
 
       const response = await axios.get(
@@ -138,15 +155,16 @@ export class DataService {
     }
   }
 
-  async getSpeeding(bounds: Bounds): Promise<any[]> {
+  async getSpeeding(bounds: Bounds): Promise<SpeedingData[]> {
     try {
       const params: any = {
         $limit: 1000,
         $where: 'latitude IS NOT NULL AND longitude IS NOT NULL',
       };
 
-      if (config.nycOpenDataApiKey) {
-        params.$$app_token = config.nycOpenDataApiKey;
+      const apiKey = this.getNYCOpenDataApiKey();
+      if (apiKey) {
+        params.$$app_token = apiKey;
       }
 
       const response = await axios.get(
@@ -187,8 +205,9 @@ export class DataService {
         $where: 'latitude IS NOT NULL AND longitude IS NOT NULL',
       };
 
-      if (config.nycOpenDataApiKey) {
-        params.$$app_token = config.nycOpenDataApiKey;
+      const apiKey = this.getNYCOpenDataApiKey();
+      if (apiKey) {
+        params.$$app_token = apiKey;
       }
 
       const response = await axios.get(

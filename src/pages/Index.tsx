@@ -71,7 +71,7 @@ const Index = () => {
     setDestinationInput(defaultDestination.address);
   }, []);
 
-  // Fetch routes from backend when locations or preferences change
+  // Generate routes when locations or preferences change
   useEffect(() => {
     if (origin && destination && mapboxToken) {
       setIsLoading(true);
@@ -93,8 +93,8 @@ const Index = () => {
         .catch((error) => {
           console.error("Error fetching routes:", error);
           toast({
-            title: "Error fetching routes",
-            description: error.message || "Failed to fetch routes from backend. Please check your backend connection.",
+            title: "Error generating routes",
+            description: error.message || "Failed to generate routes. Please check your API keys and try again.",
             variant: "destructive",
           });
           setRoutes([]);
@@ -215,7 +215,7 @@ const Index = () => {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                No routes found. Check your backend connection or try different locations.
+                No routes found. Try different locations or check your API keys.
               </AlertDescription>
             </Alert>
           )}
