@@ -25,42 +25,56 @@ This document outlines how to integrate your Flask/FastAPI backend with the Safe
 ```
 
 **Response:**
+Your backend should return **exactly 10 route options** as an array:
+
 ```json
 [
   {
-    "id": "route-a",
-    "name": "Route A",
+    "id": "route-1",
+    "name": "Route 1",
     "duration": 12,  // minutes
     "distance": 3.2,  // km
-    "safetyScore": 4.1,  // 0-10 scale
+    "safetyScore": 4.1,  // 0-10 scale, higher is safer (overall)
     "preference": "fastest",  // "fastest", "balanced", or "safest"
     "coordinates": [
-      [-73.985428, 40.758896],  // [lng, lat] pairs
+      [-73.985428, 40.758896],  // [lng, lat] pairs for Mapbox
       [-73.984, 40.760],
       // ... more coordinates
       [-73.968285, 40.785091]
-    ]
+    ],
+    "ratings": {
+      "crime": 6.2,  // 0-10 scale, lower is safer
+      "speeding": 7.5,  // 0-10 scale, lower is safer
+      "crash": 5.8,  // 0-10 scale, lower is safer
+      "construction": 2.1,  // 0-10 scale, lower is safer
+      "floodRisk": 1.0  // 0-10 scale, lower is safer
+    }
   },
   {
-    "id": "route-b",
-    "name": "Route B",
+    "id": "route-2",
+    "name": "Route 2",
     "duration": 14,
     "distance": 3.8,
     "safetyScore": 8.3,
     "preference": "safest",
-    "coordinates": [...]
-  },
-  {
-    "id": "route-c",
-    "name": "Route C",
-    "duration": 13,
-    "distance": 3.5,
-    "safetyScore": 6.7,
-    "preference": "balanced",
-    "coordinates": [...]
+    "coordinates": [...],
+    "ratings": {
+      "crime": 2.1,
+      "speeding": 1.8,
+      "crash": 1.5,
+      "construction": 3.2,
+      "floodRisk": 0.5
+    }
   }
+  // ... 8 more routes (total of 10)
 ]
 ```
+
+**Important:** 
+- Return **exactly 10 routes** (or fewer if less are available)
+- Each route must include the `ratings` object with all 5 risk factors
+- The `safetyScore` is the overall weighted score combining all risk factors
+- Coordinates must be in `[lng, lat]` format for Mapbox compatibility
 
 ## Integration Steps
 
@@ -141,23 +155,63 @@ For production, set this to your deployed backend URL.
 
 ## Safety Score Calculation
 
-Your backend should compute the safety score (0-10 scale) based on:
+Your backend should compute detailed ratings and overall safety score based on:
 
-1. **Crash Data**: Weight fatal crashes higher than injury/property damage
-2. **Crime Data**: Weight violent crimes higher than property crimes
-3. **Speed Risk**: Penalize high-speed corridors or high-injury networks
+1. **Crime Data**: Analyze crime incidents along the route (violent crimes weighted higher than property crimes)
+2. **Speeding Data**: Identify high-speed corridors, speeding violations, or high-injury networks
+3. **Crash Data**: Weight fatal crashes higher than injury/property damage crashes
+4. **Construction Data**: Active construction zones, road work, closures
+5. **Flood Risk**: Historical flood data, flood zone areas, low-lying regions
+
+### Individual Ratings (0-10 scale, lower is safer):
+Each route should have ratings for all 5 factors:
+- `crime`: 0 = very safe, 10 = high crime risk
+- `speeding`: 0 = low speed/safe, 10 = high speed/dangerous
+- `crash`: 0 = no crashes, 10 = high crash frequency
+- `construction`: 0 = no construction, 10 = heavy construction
+- `floodRisk`: 0 = no flood risk, 10 = high flood risk
+
+### Overall Safety Score (0-10 scale, higher is safer):
+The `safetyScore` is a weighted combination of all factors:
 
 Example formula:
 ```python
-crash_risk = (w_fatal * fatal_count + w_injury * injury_count + w_property * property_count)
-crime_risk = (w_violent * violent_count + w_theft * theft_count)
-speed_risk = 1 if on_high_speed_corridor else 0
+# Calculate individual risk scores (0-10, higher = more risky)
+crime_rating = calculate_crime_risk(route_coordinates)
+speeding_rating = calculate_speeding_risk(route_coordinates)
+crash_rating = calculate_crash_risk(route_coordinates)
+construction_rating = calculate_construction_risk(route_coordinates)
+flood_risk_rating = calculate_flood_risk(route_coordinates)
 
-point_risk = a * crash_risk + b * crime_risk + c * speed_risk
-route_risk = average(all_point_risks_along_route)
+# Weight each factor (adjust weights based on importance)
+weights = {
+    'crime': 0.25,
+    'speeding': 0.20,
+    'crash': 0.30,
+    'construction': 0.15,
+    'floodRisk': 0.10
+}
 
-safety_score = 10 * exp(-k * route_risk)  # Normalize to 0-10
+# Calculate overall risk (0-10, higher = more risky)
+overall_risk = (
+    weights['crime'] * crime_rating +
+    weights['speeding'] * speeding_rating +
+    weights['crash'] * crash_rating +
+    weights['construction'] * construction_rating +
+    weights['floodRisk'] * flood_risk_rating
+)
+
+# Convert to safety score (0-10, higher = safer)
+safety_score = 10 - overall_risk  # Invert: lower risk = higher safety
 ```
+
+### Route Generation:
+Your backend should:
+1. Use Mapbox Directions API or similar to generate **10 alternative routes** between origin and destination
+2. For each route, analyze the path against all 5 data sources
+3. Calculate individual ratings and overall safety score
+4. Sort routes based on the user's `safetyPreference` (0 = fastest, 100 = safest)
+5. Return all 10 routes with their ratings
 
 ## Coordinate Format
 

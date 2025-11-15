@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { Location, RouteData, TravelMode } from "@/types/route";
-import { getMockRoutes } from "@/services/mockRoutes";
+import { fetchRoutes } from "@/services/apiRoutes";
 import MapView from "@/components/MapContainer";
 import RouteCard from "@/components/RouteCard";
 import SafetySlider from "@/components/SafetySlider";
 import ModeToggle from "@/components/ModeToggle";
 import LocationInput from "@/components/LocationInput";
 import { Card } from "@/components/ui/card";
-import { Shield, AlertCircle } from "lucide-react";
+import { Shield, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
+  
   // Get Mapbox token from environment variable
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
   
@@ -24,6 +27,7 @@ const Index = () => {
   
   const [routes, setRoutes] = useState<RouteData[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // For demo: set default NYC locations
   useEffect(() => {
@@ -44,23 +48,45 @@ const Index = () => {
     setDestinationInput(defaultDestination.address);
   }, []);
 
-  // Generate routes when locations or preferences change
+  // Fetch routes from backend when locations or preferences change
   useEffect(() => {
     if (origin && destination && mapboxToken) {
-      const newRoutes = getMockRoutes({
+      setIsLoading(true);
+      setRoutes([]);
+      setSelectedRoute(null);
+
+      fetchRoutes({
         origin,
         destination,
         mode,
         safetyPreference,
-      });
-      setRoutes(newRoutes);
-      setSelectedRoute(newRoutes[0]);
+      })
+        .then((newRoutes) => {
+          setRoutes(newRoutes);
+          if (newRoutes.length > 0) {
+            setSelectedRoute(newRoutes[0]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching routes:", error);
+          toast({
+            title: "Error fetching routes",
+            description: error.message || "Failed to fetch routes from backend. Please check your backend connection.",
+            variant: "destructive",
+          });
+          setRoutes([]);
+          setSelectedRoute(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     } else {
       // Clear routes if locations are missing
       setRoutes([]);
       setSelectedRoute(null);
+      setIsLoading(false);
     }
-  }, [origin, destination, mode, safetyPreference, mapboxToken]);
+  }, [origin, destination, mode, safetyPreference, mapboxToken, toast]);
 
   const handleMapClick = (lng: number, lat: number) => {
     if (!origin) {
@@ -127,9 +153,20 @@ const Index = () => {
           </div>
 
           {/* Routes */}
-          {routes.length > 0 && (
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">
+                Fetching routes...
+              </span>
+            </div>
+          )}
+          
+          {!isLoading && routes.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold">Available Routes</h2>
+              <h2 className="text-lg font-semibold">
+                Available Routes ({routes.length})
+              </h2>
               {routes.map((route) => (
                 <RouteCard
                   key={route.id}
@@ -141,15 +178,15 @@ const Index = () => {
             </div>
           )}
 
-          {/* Backend Integration Notice */}
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-xs">
-              <strong>Demo Mode:</strong> Currently showing mock data. Connect
-              your Flask/FastAPI backend to see real routes with crash and crime
-              data.
-            </AlertDescription>
-          </Alert>
+          {!isLoading && routes.length === 0 && origin && destination && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                No routes found. Check your backend connection or try different locations.
+              </AlertDescription>
+            </Alert>
+          )}
+
         </div>
       </aside>
 
