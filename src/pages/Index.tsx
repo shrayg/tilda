@@ -7,17 +7,12 @@ import SafetySlider from "@/components/SafetySlider";
 import ModeToggle from "@/components/ModeToggle";
 import LocationInput from "@/components/LocationInput";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Shield, AlertCircle, Info } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Shield, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
-  const { toast } = useToast();
-  // 🔑 MANUALLY SET TOKEN: Replace empty string with your token: "pk.eyJ1..."
-  const [mapboxToken, setMapboxToken] = useState("");
-  const [showTokenInput, setShowTokenInput] = useState(!!mapboxToken ? false : true);
+  // Get Mapbox token from environment variable
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
   
   const [origin, setOrigin] = useState<Location | null>(null);
   const [destination, setDestination] = useState<Location | null>(null);
@@ -76,63 +71,6 @@ const Index = () => {
       setDestinationInput(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     }
   };
-
-  const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      setShowTokenInput(false);
-      toast({
-        title: "Mapbox token added",
-        description: "You can now use the map features",
-      });
-    }
-  };
-
-  if (showTokenInput) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-6 space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold">SafeRoute</h1>
-          </div>
-          
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              This app uses Mapbox for mapping. Get your free access token at{" "}
-              <a
-                href="https://www.mapbox.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline font-medium"
-              >
-                mapbox.com
-              </a>
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Mapbox Access Token</label>
-            <Input
-              type="password"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              placeholder="pk.eyJ1..."
-              onKeyDown={(e) => e.key === "Enter" && handleTokenSubmit()}
-            />
-          </div>
-
-          <Button onClick={handleTokenSubmit} className="w-full" size="lg">
-            Continue
-          </Button>
-
-          <p className="text-xs text-muted-foreground text-center">
-            Your token is stored locally and never sent to our servers
-          </p>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden">
