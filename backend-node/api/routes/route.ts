@@ -237,10 +237,14 @@ export default async function routesHandler(req: Request, res: Response) {
       });
     } else {
       routes.sort((a, b) => {
-        const scoreA = a.safetyScore * 0.6 - (1 / a.duration) * 0.4;
-        const scoreB = b.safetyScore * 0.6 - (1 / b.duration) * 0.4;
+        // Handle division by zero: if duration is 0, treat it as very large (low priority)
+        const durationA = a.duration > 0 ? a.duration : Number.MAX_SAFE_INTEGER;
+        const durationB = b.duration > 0 ? b.duration : Number.MAX_SAFE_INTEGER;
+        
+        const scoreA = a.safetyScore * 0.6 - (1 / durationA) * 0.4;
+        const scoreB = b.safetyScore * 0.6 - (1 / durationB) * 0.4;
         if (scoreB !== scoreA) return scoreB - scoreA;
-        return a.duration - b.duration;
+        return durationA - durationB;
       });
     }
 

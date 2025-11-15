@@ -30,10 +30,9 @@ export function verifyToken(token: string): JWTPayload | null {
 }
 
 export async function verifyGoogleToken(idToken: string): Promise<{ email: string; name?: string; sub: string } | null> {
-  // For demo, return mock data
-  // In production, verify with Google's API
+  // Require Google Client ID to be configured for authentication
   if (!config.googleClientId) {
-    return { email: 'test@example.com', name: 'Test User', sub: 'test' };
+    return null;
   }
   
   // TODO: Implement Google token verification
@@ -41,18 +40,29 @@ export async function verifyGoogleToken(idToken: string): Promise<{ email: strin
   // const client = new OAuth2Client(config.googleClientId);
   // const ticket = await client.verifyIdToken({ idToken, audience: config.googleClientId });
   // const payload = ticket.getPayload();
+  // if (payload) {
+  //   return {
+  //     email: payload.email || '',
+  //     name: payload.name,
+  //     sub: payload.sub || '',
+  //   };
+  // }
   
   return null;
 }
 
 export async function verifyAppleToken(idToken: string): Promise<{ email: string; sub: string } | null> {
-  // For demo, return mock data
-  // In production, verify with Apple's API
+  // Require Apple Client ID to be configured for authentication
   if (!config.appleClientId) {
-    return { email: 'test@example.com', sub: 'test' };
+    return null;
   }
   
   // TODO: Implement Apple token verification
+  // Verify the token using Apple's JWT verification
+  // Extract email and sub from verified token payload
+  // Return { email: payload.email, sub: payload.sub } if valid
+  // Return null if invalid or verification fails
+  
   return null;
 }
 

@@ -27,31 +27,56 @@ const MapView = ({
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
-
-    mapboxgl.accessToken = mapboxToken;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: [-73.985428, 40.758896],
-      zoom: 12,
-    });
+    // Don't initialize if token is missing
+    if (!mapboxToken || mapboxToken.trim() === "") {
+      console.error("Mapbox token is missing. Please set VITE_MAPBOX_TOKEN in your .env file.");
+      return;
+    }
 
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      "top-right"
-    );
+    const container = mapContainer.current;
 
-    // Add click handler
-    map.current.on("click", (e) => {
-      onMapClick(e.lngLat.lng, e.lngLat.lat);
-    });
+    try {
+      mapboxgl.accessToken = mapboxToken;
+      
+      map.current = new mapboxgl.Map({
+        container: container,
+        style: "mapbox://styles/mapbox/light-v11",
+        center: [-73.985428, 40.758896],
+        zoom: 12,
+      });
+
+      // Add error handler
+      map.current.on("error", (e) => {
+        console.error("Mapbox error:", e);
+      });
+
+      // Ensure map resizes properly
+      map.current.on("load", () => {
+        map.current?.resize();
+      });
+
+      // Add navigation controls
+      map.current.addControl(
+        new mapboxgl.NavigationControl({
+          visualizePitch: true,
+        }),
+        "top-right"
+      );
+
+      // Add click handler
+      map.current.on("click", (e) => {
+        onMapClick(e.lngLat.lng, e.lngLat.lat);
+      });
+    } catch (error) {
+      console.error("Failed to initialize map:", error);
+    }
 
     return () => {
-      map.current?.remove();
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, [mapboxToken, onMapClick]);
 
@@ -195,6 +220,19 @@ const MapView = ({
       // Cleanup will happen when routes change
     };
   }, [routes, selectedRoute]);
+
+  if (!mapboxToken || mapboxToken.trim() === "") {
+    return (
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
+        <div className="text-center p-6">
+          <p className="text-lg font-semibold mb-2">Mapbox Token Missing</p>
+          <p className="text-sm text-muted-foreground">
+            Please set VITE_MAPBOX_TOKEN in your .env file to display the map.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={mapContainer} className="absolute inset-0 w-full h-full" />

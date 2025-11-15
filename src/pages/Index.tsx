@@ -9,8 +9,7 @@ import ModeToggle from "@/components/ModeToggle";
 import LocationInput from "@/components/LocationInput";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Shield, AlertCircle, Info, LogOut } from "lucide-react";
+import { Shield, AlertCircle, Info, LogOut, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +18,6 @@ import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  // 🔑 MANUALLY SET TOKEN: Replace empty string with your token: "pk.eyJ1..."
   const { user, signOut } = useAuth();
   
   const handleSignOut = async () => {
@@ -38,8 +36,9 @@ const Index = () => {
       });
     }
   };
-  const [mapboxToken, setMapboxToken] = useState("");
-  const [showTokenInput, setShowTokenInput] = useState(!!mapboxToken ? false : true);
+  
+  // Get Mapbox token from environment variable
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
   
   const [origin, setOrigin] = useState<Location | null>(null);
   const [destination, setDestination] = useState<Location | null>(null);
