@@ -47,18 +47,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        safe: {
-          DEFAULT: "hsl(var(--safe))",
-          foreground: "hsl(var(--safe-foreground))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
-        danger: {
-          DEFAULT: "hsl(var(--danger))",
-          foreground: "hsl(var(--danger-foreground))",
-        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -69,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        danger: {
+          high: "hsl(var(--danger-high))",
+          medium: "hsl(var(--danger-medium))",
+          low: "hsl(var(--danger-low))",
+        },
+        safe: "hsl(var(--safe))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -96,6 +92,13 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      backdropSaturate: {
+        150: '1.5',
+        180: '1.8',
       },
     },
   },

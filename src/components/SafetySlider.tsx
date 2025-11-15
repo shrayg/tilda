@@ -1,43 +1,47 @@
-import { Slider } from "@/components/ui/slider";
-import { Zap, Shield } from "lucide-react";
+import { Slider } from './ui/slider';
+import { Zap, Shield } from 'lucide-react';
 
 interface SafetySliderProps {
   value: number;
   onChange: (value: number) => void;
 }
 
-const SafetySlider = ({ value, onChange }: SafetySliderProps) => {
+export const SafetySlider = ({ value, onChange }: SafetySliderProps) => {
+  const getLabel = (val: number) => {
+    if (val <= 20) return 'Fastest';
+    if (val <= 40) return 'Fast';
+    if (val <= 60) return 'Balanced';
+    if (val <= 80) return 'Safer';
+    return 'Safest';
+  };
+
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-sm font-medium">
+    <div className="space-y-3 p-4 bg-card rounded-lg border">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-primary" />
-          <span>Fastest</span>
+          <Zap className="w-4 h-4 text-info" />
+          <span className="text-sm font-medium">Route Preference</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>Safest</span>
+          <span className="text-sm font-semibold text-primary">{getLabel(value)}</span>
           <Shield className="w-4 h-4 text-safe" />
         </div>
       </div>
-      
-      <Slider
-        value={[value]}
-        onValueChange={(values) => onChange(values[0])}
-        min={0}
-        max={100}
-        step={1}
-        className="w-full"
-      />
-      
-      <div className="text-center text-xs text-muted-foreground">
-        {value < 33
-          ? "Prioritizing speed"
-          : value < 67
-          ? "Balanced approach"
-          : "Prioritizing safety"}
+
+      <div className="px-2">
+        <Slider
+          value={[value]}
+          onValueChange={(vals) => onChange(vals[0])}
+          max={100}
+          step={1}
+          className="cursor-pointer"
+        />
+      </div>
+
+      <div className="flex justify-between text-xs text-muted-foreground px-2">
+        <span>Speed Priority</span>
+        <span>Safety Priority</span>
       </div>
     </div>
   );
 };
-
-export default SafetySlider;
