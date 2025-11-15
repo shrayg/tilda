@@ -281,7 +281,8 @@ export const SafetyMap = ({
             el.style.width = '28px';
             el.style.height = '28px';
             el.style.borderRadius = '50%';
-            el.style.cursor = 'pointer';
+            el.style.cursor = 'default';
+            el.style.pointerEvents = 'none'; // Make icons non-clickable
             el.style.backdropFilter = 'blur(8px)';
             el.style.border = '1px solid rgba(255, 255, 255, 0.18)';
             el.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
@@ -311,66 +312,13 @@ export const SafetyMap = ({
             
             el.innerHTML = iconSvg;
             
-            // Add hover effect without transform to prevent position shift
-            el.addEventListener('mouseenter', () => {
-              el.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)';
-              el.style.filter = 'brightness(1.1)';
-            });
-            el.addEventListener('mouseleave', () => {
-              el.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
-              el.style.filter = 'brightness(1)';
-            });
+            // Markers are non-interactive, no hover effects or popups
 
-            // Create glass-themed popup with event details
-            const popup = new mapboxgl.Popup({ 
-              offset: 15,
-              closeButton: false,
-              closeOnClick: false,
-              className: 'event-popup',
-              maxWidth: '280px'
-            }).setHTML(`
-              <div style="
-                padding: 12px;
-                background: rgba(0, 0, 0, 0.75);
-                backdrop-filter: blur(12px);
-                border-radius: 8px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-              ">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <span style="
-                    font-size: 10px;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    padding: 2px 8px;
-                    border-radius: 4px;
-                    background: ${el.style.backgroundColor};
-                    color: rgba(255, 255, 255, 0.95);
-                  ">${event.layer}</span>
-                </div>
-                <h4 style="
-                  margin: 0 0 6px 0;
-                  font-size: 14px;
-                  font-weight: 600;
-                  color: rgba(255, 255, 255, 0.95);
-                ">${event.title || 'Event'}</h4>
-                <p style="
-                  margin: 0;
-                  font-size: 12px;
-                  line-height: 1.4;
-                  color: rgba(255, 255, 255, 0.85);
-                ">${event.description || 'No description available'}</p>
-              </div>
-            `);
-
+            // Create marker without popup and non-interactive
+            // pointer-events: none makes it completely non-clickable
             const marker = new mapboxgl.Marker(el)
               .setLngLat([event.lng, event.lat])
-              .setPopup(popup)
               .addTo(map.current);
-
-            // Show popup on hover
-            el.addEventListener('mouseenter', () => marker.togglePopup());
-            el.addEventListener('mouseleave', () => marker.togglePopup());
 
             markersRef.current.push(marker);
           }
