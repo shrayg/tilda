@@ -19,6 +19,13 @@ export const getMockRoutes = (request: RouteRequest): RouteData[] => {
     safetyScore: 4.1,
     preference: "fastest",
     coordinates: generateMockPath(request.origin, request.destination, 0.98),
+    ratings: {
+      crime: 6.2,
+      speeding: 7.5,
+      crash: 5.8,
+      construction: 2.1,
+      floodRisk: 1.0,
+    },
   };
 
   const routeB: RouteData = {
@@ -29,6 +36,13 @@ export const getMockRoutes = (request: RouteRequest): RouteData[] => {
     safetyScore: 8.3,
     preference: "safest",
     coordinates: generateMockPath(request.origin, request.destination, 1.15),
+    ratings: {
+      crime: 2.1,
+      speeding: 1.8,
+      crash: 1.5,
+      construction: 3.2,
+      floodRisk: 0.5,
+    },
   };
 
   const routeC: RouteData = {
@@ -39,6 +53,13 @@ export const getMockRoutes = (request: RouteRequest): RouteData[] => {
     safetyScore: 6.7,
     preference: "balanced",
     coordinates: generateMockPath(request.origin, request.destination, 1.05),
+    ratings: {
+      crime: 4.2,
+      speeding: 4.8,
+      crash: 3.9,
+      construction: 2.5,
+      floodRisk: 0.8,
+    },
   };
 
   return [routeA, routeB, routeC];

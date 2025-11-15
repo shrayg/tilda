@@ -59,60 +59,71 @@ const MapView = ({
   useEffect(() => {
     if (!map.current) return;
 
-    // Clear existing markers
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
+    const mapInstance = map.current;
 
-    // Add origin marker
-    if (origin) {
-      const el = document.createElement("div");
-      el.className = "custom-marker";
-      el.innerHTML = `
-        <div class="bg-primary text-primary-foreground p-2 rounded-full shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-        </div>
-      `;
-      
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([origin.lng, origin.lat])
-        .addTo(map.current);
-      
-      markersRef.current.push(marker);
-    }
+    // Wait for map to be loaded before adding markers
+    const updateMarkers = () => {
+      // Clear existing markers
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
 
-    // Add destination marker
-    if (destination) {
-      const el = document.createElement("div");
-      el.className = "custom-marker";
-      el.innerHTML = `
-        <div class="bg-safe text-safe-foreground p-2 rounded-full shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-        </div>
-      `;
-      
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([destination.lng, destination.lat])
-        .addTo(map.current);
-      
-      markersRef.current.push(marker);
-    }
+      // Add origin marker
+      if (origin) {
+        const el = document.createElement("div");
+        el.className = "custom-marker";
+        el.innerHTML = `
+          <div class="bg-primary text-primary-foreground p-2 rounded-full shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+        `;
+        
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([origin.lng, origin.lat])
+          .addTo(mapInstance);
+        
+        markersRef.current.push(marker);
+      }
 
-    // Fit bounds if both markers exist
-    if (origin && destination && map.current) {
-      const bounds = new mapboxgl.LngLatBounds()
-        .extend([origin.lng, origin.lat])
-        .extend([destination.lng, destination.lat]);
-      
-      map.current.fitBounds(bounds, {
-        padding: { top: 100, bottom: 100, left: 100, right: 100 },
-        duration: 1000,
-      });
+      // Add destination marker
+      if (destination) {
+        const el = document.createElement("div");
+        el.className = "custom-marker";
+        el.innerHTML = `
+          <div class="bg-safe text-safe-foreground p-2 rounded-full shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+        `;
+        
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([destination.lng, destination.lat])
+          .addTo(mapInstance);
+        
+        markersRef.current.push(marker);
+      }
+
+      // Fit bounds if both markers exist
+      if (origin && destination) {
+        const bounds = new mapboxgl.LngLatBounds()
+          .extend([origin.lng, origin.lat])
+          .extend([destination.lng, destination.lat]);
+        
+        mapInstance.fitBounds(bounds, {
+          padding: { top: 100, bottom: 100, left: 100, right: 100 },
+          duration: 1000,
+        });
+      }
+    };
+
+    if (mapInstance.isStyleLoaded()) {
+      updateMarkers();
+    } else {
+      mapInstance.once("load", updateMarkers);
     }
   }, [origin, destination]);
 
