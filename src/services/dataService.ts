@@ -247,13 +247,13 @@ class DataService {
     try {
       const gridUrl = `${NWS_FORECAST_BASE}/points/${location.lat},${location.lng}`;
       const response = await axios.get(gridUrl, {
-        headers: { 'User-Agent': 'SafeRoute/1.0' },
+        headers: { 'User-Agent': 'Tilde/1.0' },
         timeout: 30000,
       });
 
       if (response.data?.properties?.forecast) {
         const forecastResponse = await axios.get(response.data.properties.forecast, {
-          headers: { 'User-Agent': 'SafeRoute/1.0' },
+          headers: { 'User-Agent': 'Tilde/1.0' },
           timeout: 30000,
         });
 
@@ -284,7 +284,7 @@ class DataService {
   async getAlerts(area: string = 'NY'): Promise<any[]> {
     try {
       const response = await axios.get(`${NWS_ALERTS_BASE}?area=${area}`, {
-        headers: { 'User-Agent': 'SafeRoute/1.0' },
+        headers: { 'User-Agent': 'Tilde/1.0' },
         timeout: 30000,
       });
 

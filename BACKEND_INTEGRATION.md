@@ -1,6 +1,6 @@
 # Backend Integration Guide
 
-This document outlines how to integrate your Flask/FastAPI backend with the SafeRoute frontend.
+This document outlines how to integrate your Flask/FastAPI backend with the Tilde frontend.
 
 ## API Endpoint Required
 

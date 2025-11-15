@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Starting SafeRoute Application
+echo Starting Tilde Application
 echo ========================================
 echo.
 
@@ -9,7 +9,7 @@ cd /d "%~dp0"
 
 REM Start backend in new window
 echo [1/2] Starting backend server...
-start "SafeRoute Backend" cmd /k "cd /d %CD%\backend-node && start.bat"
+start "Tilde Backend" cmd /k "cd /d %CD%\backend-node && start.bat"
 
 REM Wait a bit for backend to start
 echo Waiting for backend to initialize...
@@ -17,7 +17,7 @@ timeout /t 3 /nobreak >nul
 
 REM Start frontend in new window
 echo [2/2] Starting frontend server...
-start "SafeRoute Frontend" cmd /k "cd /d %CD% && npm run dev"
+start "Tilde Frontend" cmd /k "cd /d %CD% && npm run dev"
 
 echo.
 echo ========================================

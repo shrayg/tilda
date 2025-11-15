@@ -1,5 +1,5 @@
 @echo off
-echo Starting SafeRoute Frontend...
+echo Starting Tilde Frontend...
 echo.
 echo Frontend will run on: http://localhost:8080
 echo.

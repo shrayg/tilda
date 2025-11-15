@@ -131,7 +131,7 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <Shield className="w-8 h-8 text-primary" />
               <div>
-                <h1 className="text-2xl font-bold">SafeRoute</h1>
+                <h1 className="text-2xl font-bold">Tilde</h1>
                 <p className="text-sm text-muted-foreground">
                   Navigate with confidence
                 </p>
