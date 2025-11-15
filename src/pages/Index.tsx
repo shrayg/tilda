@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Location, RouteData, TravelMode } from "@/types/route";
 import { getMockRoutes } from "@/services/mockRoutes";
 import MapView from "@/components/MapContainer";
@@ -9,13 +10,34 @@ import LocationInput from "@/components/LocationInput";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, AlertCircle, Info } from "lucide-react";
+import { Shield, AlertCircle, Info, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/useAuth";
+
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   // 🔑 MANUALLY SET TOKEN: Replace empty string with your token: "pk.eyJ1..."
+  const { user, signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message || "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
   const [mapboxToken, setMapboxToken] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(!!mapboxToken ? false : true);
   
@@ -140,14 +162,24 @@ const Index = () => {
       <aside className="w-full md:w-96 bg-card border-r border-border overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Header */}
-          <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold">SafeRoute</h1>
-              <p className="text-sm text-muted-foreground">
-                Navigate with confidence
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-primary" />
+              <div>
+                <h1 className="text-2xl font-bold">SafeRoute</h1>
+                <p className="text-sm text-muted-foreground">
+                  Navigate with confidence
+                </p>
+              </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSignOut}
+              title="Sign out"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Location Inputs */}
